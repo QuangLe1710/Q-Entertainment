@@ -1,0 +1,8 @@
+spring:
+    application:
+        name: Q-Entertainment
+
+    flyway:
+      locations: classpath:/db/migration
+      ignore-missing-migrations: true
+      out-of-order: true
