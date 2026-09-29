@@ -21,19 +21,19 @@ import javax.crypto.spec.SecretKeySpec;
 public class SecurityConfig {
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Admin Account (Can access Swagger & Admin endpoints)
+    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails admin = User.builder()
                 .username("admin")
-                .password("{noop}admin123") // {noop} is for plain text testing
+                .password(passwordEncoder.encode("admin123"))
                 .roles("ADMIN")
                 .build();
-        // Regular User Account (Blocked from Swagger & Admin endpoints)
+
         UserDetails user = User.builder()
                 .username("user")
-                .password("{noop}user123")
+                .password(passwordEncoder.encode("user123"))
                 .roles("USER")
                 .build();
+
         return new InMemoryUserDetailsManager(admin, user);
     }
 
