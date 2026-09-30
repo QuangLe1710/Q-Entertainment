@@ -36,12 +36,11 @@ public class SecurityConfig {
     }
 
     @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenUtil jwtTokenUtil,
-                                                                                                   UserDetailsService userDetailsService) throws Exception {
+        public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) throws Exception {
         http
-                                .addFilterBefore(new JwtRequestFilter(jwtTokenUtil, userDetailsService),
+                .addFilterBefore(new JwtRequestFilter(jwtTokenUtil, userDetailsService),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Protect all Swagger endpoints: UI, redirect URL, and API specs
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").hasRole("ADMIN")
