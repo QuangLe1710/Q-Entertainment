@@ -1,6 +1,7 @@
 package com.app.Q_Entertainment.Controller;
 
 import com.app.Q_Entertainment.Model.DTO.ApiResponse;
+import com.app.Q_Entertainment.Model.DTO.Request.AuthLoginRequest;
 import com.app.Q_Entertainment.Model.DTO.Request.RegisterDTO;
 import com.app.Q_Entertainment.Model.DTO.ResponseUtil;
 import com.app.Q_Entertainment.Service.AuthService;
@@ -21,6 +22,11 @@ public class AuthController {
     public ApiResponse<?> register(RegisterDTO registerDTO, HttpServletRequest request){
         authService.register(registerDTO, request);
         return ResponseUtil.success(null, "Register Successfully", request.getRequestURI());
+    }
+
+    @PostMapping("/login")
+    public ApiResponse<?> login(AuthLoginRequest authLoginRequest, HttpServletRequest request) {
+        return ResponseUtil.success(authService.login(authLoginRequest, request), "Login Successfully", request.getRequestURI());
     }
 
 }
