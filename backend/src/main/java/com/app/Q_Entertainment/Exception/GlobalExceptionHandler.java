@@ -22,4 +22,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(InvalidUsernamePasswordException.class)
+    public ApiResponse<?> handleInvalidUsernamePasswordExceptionException(InvalidUsernamePasswordException exception, HttpServletRequest request) {
+        return ResponseUtil.error(
+                Arrays.asList(exception.getMessage()),
+                "Try again enter username and password",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI()
+        );
+    }
+
 }
