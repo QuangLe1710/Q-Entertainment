@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Override
     public void register(RegisterDTO registerDTO, HttpServletRequest request) {
@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(registerDTO.getEmail())
                 .fullName(registerDTO.getFullName())
                 .avatarUrl(registerDTO.getAvatarUrl())
+                .isActive(true)
                 .build();
         usersRepository.save(user);
     }
@@ -51,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidUsernamePasswordException("Invalid username or password");
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
         return jwtTokenUtil.generateToken(userDetails);
     }
 }

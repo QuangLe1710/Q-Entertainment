@@ -20,16 +20,16 @@ public class JwtTokenUtil {
     private final long validityInMilliseconds = 360000;
 
     public String generateToken(UserDetails userDetails) {
-        Claims claims = Jwts.claims().setSubject(userDetails.getUsername()).build();
-        claims.put("ROLES", userDetails.getAuthorities());
-
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
+        // In jjwt 0.12.x, Claims from .build() are immutable — use .subject() and .claim()
+        // on the JwtBuilder directly instead of building a Claims object and mutating it.
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(validity)
+                .subject(userDetails.getUsername())
+                .claim("ROLES", userDetails.getAuthorities())
+                .issuedAt(now)
+                .expiration(validity)
                 .signWith(secretKey)
                 .compact();
     }
