@@ -17,7 +17,7 @@ public class JwtTokenUtil {
 
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
-    private final long validityInMilliseconds = 360000;
+    private final long validityInMilliseconds = 360000; // 100 hours
 
     public String generateToken(UserDetails userDetails) {
         Date now = new Date();

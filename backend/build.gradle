@@ -1,5 +1,7 @@
 plugins {
 	id 'java'
+	id 'jacoco'
+	id 'org.sonarqube' version '7.5.0.8588'
 	id 'org.springframework.boot' version '4.1.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -52,4 +54,25 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		csv.required = false
+		html.required = true
+	}
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "Q-Entertainment"
+		property "sonar.projectName", "Q-Entertainment"
+		property "sonar.host.url", "http://neekon2508.onthewifi.com:9000"
+		property "sonar.token", System.getenv("SONAR_TOKEN") ?: "sqp_7ddccd9e89e56298655ef0cb294a2e0cabb85a67"
+		property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+	}
+}
+
