@@ -2,8 +2,9 @@ package com.app.Q_Entertainment.Util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,9 +16,16 @@ import java.util.Date;
 @Component
 public class JwtTokenUtil {
 
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private final SecretKey secretKey;
+    private final long validityInMilliseconds;
 
-    private final long validityInMilliseconds = 360000; // 100 hours
+    public JwtTokenUtil(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long validityInMilliseconds) {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.secretKey = Keys.hmacShaKeyFor(keyBytes);
+        this.validityInMilliseconds = validityInMilliseconds;
+    }
 
     public String generateToken(UserDetails userDetails) {
         Date now = new Date();

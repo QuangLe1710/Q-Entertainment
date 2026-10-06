@@ -20,3 +20,9 @@ spring:
   jpa:
     database: postgresql
     show-sql: true
+
+jwt:
+  secret: kJ2HefWz9kapdz8exOqFItQrnDUm76dDv61JiAbUH61hUrVNXlzoRrjvFv7F/NI/CJEO2W+alUiyDaR6DYQpNg==
+  expiration: 360000000 # validity in milliseconds (100 hours)
+
+
