@@ -47,9 +47,9 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtRequestFilter(jwtTokenUtil, customUserDetailsService), org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Protect all Swagger endpoints: UI, redirect URL, and API specs
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/private/api/user/listUser").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers("/private/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_USER")
                         .anyRequest().authenticated()
                 )
