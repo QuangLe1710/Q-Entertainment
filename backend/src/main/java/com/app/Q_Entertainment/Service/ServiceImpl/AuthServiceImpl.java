@@ -3,7 +3,9 @@ package com.app.Q_Entertainment.Service.ServiceImpl;
 import com.app.Q_Entertainment.Exception.EmailAlreadyExistsException;
 import com.app.Q_Entertainment.Exception.InvalidUsernamePasswordException;
 import com.app.Q_Entertainment.Model.DTO.Request.AuthLoginRequest;
+import com.app.Q_Entertainment.Model.DTO.Request.RefreshRequest;
 import com.app.Q_Entertainment.Model.DTO.Request.RegisterDTO;
+import com.app.Q_Entertainment.Model.DTO.Response.AuthLoginResponse;
 import com.app.Q_Entertainment.Model.Entity.User;
 import com.app.Q_Entertainment.Repository.UsersRepository;
 import com.app.Q_Entertainment.Service.AuthService;
@@ -44,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(AuthLoginRequest authLoginRequest, HttpServletRequest request) {
+    public AuthLoginResponse login(AuthLoginRequest authLoginRequest, HttpServletRequest request) {
         User user = usersRepository.findByUsername(authLoginRequest.getUsername())
                 .orElseThrow(() -> new InvalidUsernamePasswordException("Invalid username or password"));
 
@@ -53,6 +55,15 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
-        return jwtTokenUtil.generateToken(userDetails);
+        return AuthLoginResponse.builder()
+                .accessToken(jwtTokenUtil.generateAccessToken(userDetails))
+                .refreshToken(jwtTokenUtil.generateRefreshToken(user, userDetails))
+                .build();
+//        return jwtTokenUtil.generateToken(userDetails);
+    }
+
+    @Override
+    public Object refresh(RefreshRequest refreshRequest) {
+        return null;
     }
 }

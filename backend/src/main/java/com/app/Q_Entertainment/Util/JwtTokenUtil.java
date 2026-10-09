@@ -1,9 +1,14 @@
 package com.app.Q_Entertainment.Util;
 
+import com.app.Q_Entertainment.Model.DTO.Response.AuthLoginResponse;
+import com.app.Q_Entertainment.Model.Entity.User;
+import com.app.Q_Entertainment.Repository.RefreshTokensRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,16 +23,18 @@ public class JwtTokenUtil {
 
     private final SecretKey secretKey;
     private final long validityInMilliseconds;
+    private final RefreshTokensRepository refreshTokensRepository;
 
     public JwtTokenUtil(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long validityInMilliseconds) {
+            @Value("${jwt.expiration}") long validityInMilliseconds, RefreshTokensRepository refreshTokensRepository) {
+        this.refreshTokensRepository = refreshTokensRepository;
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.validityInMilliseconds = validityInMilliseconds;
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateAccessToken(UserDetails userDetails) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
@@ -40,6 +47,19 @@ public class JwtTokenUtil {
                 .expiration(validity)
                 .signWith(secretKey)
                 .compact();
+    }
+
+    public String generateRefreshToken(User user, UserDetails userDetails) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
+
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .claim("userId", user.getId())
+//                .claim("refreshId", refreshTokensRepository.findById())
+                .signWith(secretKey)
+                .compact();
+
     }
 
     public Claims getClaims(String token) {

@@ -2,6 +2,7 @@ package com.app.Q_Entertainment.Controller;
 
 import com.app.Q_Entertainment.Model.DTO.ApiResponse;
 import com.app.Q_Entertainment.Model.DTO.Request.AuthLoginRequest;
+import com.app.Q_Entertainment.Model.DTO.Request.RefreshRequest;
 import com.app.Q_Entertainment.Model.DTO.Request.RegisterDTO;
 import com.app.Q_Entertainment.Model.DTO.ResponseUtil;
 import com.app.Q_Entertainment.Service.AuthService;
@@ -27,6 +28,11 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<?> login(AuthLoginRequest authLoginRequest, HttpServletRequest request) {
         return ResponseUtil.success(authService.login(authLoginRequest, request), "Login Successfully", request.getRequestURI());
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<?> refresh(RefreshRequest refreshRequest, HttpServletRequest request){
+        return ResponseUtil.success(authService.refresh(refreshRequest), "Refresh Token Successfully", request.getRequestURI());
     }
 
 }
