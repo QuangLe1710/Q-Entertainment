@@ -24,5 +24,6 @@ spring:
 jwt:
   secret: kJ2HefWz9kapdz8exOqFItQrnDUm76dDv61JiAbUH61hUrVNXlzoRrjvFv7F/NI/CJEO2W+alUiyDaR6DYQpNg==
   expiration: 900000 # validity in milliseconds (15 minutes)
+  expiration-rt: 604800000 # (7 days)
 
 

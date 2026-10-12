@@ -26,6 +26,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
+        String authorizationType = request.getHeader("token_type");
+        System.out.println("authorizationHeader : " + authorizationHeader);
+        System.out.println("authorizationType : " + authorizationType);
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -39,6 +42,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                         && userDetails.getUsername().equals(claims.getSubject())) {
                     Authentication authentication = jwtTokenUtil.getAuthentication(jwtToken, userDetails);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("SecurityContextHolder.getContext() : " + SecurityContextHolder.getContext());
+                    System.out.println("3 : doFilterInternal");
+                } else if( jwtTokenUtil.isTokenExpired(jwtToken) ) {
+
                 }
             } catch (RuntimeException ignored) {
                 // Invalid tokens remain unauthenticated and are handled by Spring Security.

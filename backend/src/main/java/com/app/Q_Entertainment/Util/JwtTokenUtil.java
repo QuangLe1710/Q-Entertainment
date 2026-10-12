@@ -1,6 +1,7 @@
 package com.app.Q_Entertainment.Util;
 
 import com.app.Q_Entertainment.Model.DTO.Response.AuthLoginResponse;
+import com.app.Q_Entertainment.Model.Entity.RefreshTokens;
 import com.app.Q_Entertainment.Model.Entity.User;
 import com.app.Q_Entertainment.Repository.RefreshTokensRepository;
 import io.jsonwebtoken.Claims;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -23,26 +25,30 @@ public class JwtTokenUtil {
 
     private final SecretKey secretKey;
     private final long validityInMilliseconds;
-    private final RefreshTokensRepository refreshTokensRepository;
+    private final long validityInMillisecondsRT;
 
     public JwtTokenUtil(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long validityInMilliseconds, RefreshTokensRepository refreshTokensRepository) {
-        this.refreshTokensRepository = refreshTokensRepository;
+            @Value("${jwt.expiration}") long validityInMilliseconds,
+            @Value("${jwt.expiration-rt}") long validityInMillisecondsRT
+    ) {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
         this.validityInMilliseconds = validityInMilliseconds;
+        this.validityInMillisecondsRT = validityInMillisecondsRT;
     }
 
     public String generateAccessToken(UserDetails userDetails) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
+        System.out.println("1 : generateAccessToken");
 
         // In jjwt 0.12.x, Claims from .build() are immutable — use .subject() and .claim()
         // on the JwtBuilder directly instead of building a Claims object and mutating it.
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("ROLES", userDetails.getAuthorities())
+                .claim("token_type", "ACCESS")
                 .issuedAt(now)
                 .expiration(validity)
                 .signWith(secretKey)
@@ -51,12 +57,15 @@ public class JwtTokenUtil {
 
     public String generateRefreshToken(User user, UserDetails userDetails) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validityRT = new Date(now.getTime() + validityInMillisecondsRT);
 
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("userId", user.getId())
-//                .claim("refreshId", refreshTokensRepository.findById())
+                .claim("refreshId", "test")
+                .claim("token_type", "REFRESH")
+                .issuedAt(now)
+                .expiration(validityRT)
                 .signWith(secretKey)
                 .compact();
 

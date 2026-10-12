@@ -7,6 +7,7 @@ import com.app.Q_Entertainment.Model.DTO.Request.RefreshRequest;
 import com.app.Q_Entertainment.Model.DTO.Request.RegisterDTO;
 import com.app.Q_Entertainment.Model.DTO.Response.AuthLoginResponse;
 import com.app.Q_Entertainment.Model.Entity.User;
+import com.app.Q_Entertainment.Repository.RefreshTokensRepository;
 import com.app.Q_Entertainment.Repository.UsersRepository;
 import com.app.Q_Entertainment.Service.AuthService;
 import com.app.Q_Entertainment.Util.JwtTokenUtil;
@@ -28,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenUtil jwtTokenUtil;
 
     private final CustomUserDetailsService customUserDetailsService;
+
+    private final RefreshTokensRepository refreshTokensRepository;
 
     @Override
     public void register(RegisterDTO registerDTO, HttpServletRequest request) {
@@ -55,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getUsername());
+        System.out.println("2 : login service impl");
         return AuthLoginResponse.builder()
                 .accessToken(jwtTokenUtil.generateAccessToken(userDetails))
                 .refreshToken(jwtTokenUtil.generateRefreshToken(user, userDetails))
@@ -63,7 +67,14 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Object refresh(RefreshRequest refreshRequest) {
+    public AuthLoginResponse refresh(RefreshRequest refreshRequest) {
+
+
+
+//        return AuthLoginResponse.builder()
+//                .accessToken(jwtTokenUtil.generateAccessToken(userDetails))
+//                .refreshToken(jwtTokenUtil.generateRefreshToken(user, userDetails))
+//                .build();
         return null;
     }
 }
