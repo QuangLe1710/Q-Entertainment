@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenUtil {
@@ -57,15 +58,16 @@ public class JwtTokenUtil {
 
     public String generateRefreshToken(User user, UserDetails userDetails) {
         Date now = new Date();
-        Date validityRT = new Date(now.getTime() + validityInMillisecondsRT);
+        Date expireRT = DateUtil.generateExpirationRefreshToken(validityInMilliseconds);
+        String refreshTokenId = UUID.randomUUID().toString();
 
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("userId", user.getId())
-                .claim("refreshId", "test")
+                .claim("refreshId", refreshTokenId)
                 .claim("token_type", "REFRESH")
                 .issuedAt(now)
-                .expiration(validityRT)
+                .expiration(expireRT)
                 .signWith(secretKey)
                 .compact();
 
@@ -77,6 +79,10 @@ public class JwtTokenUtil {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String getRefreshId(String token){
+        return getClaims(token).get("refreshId").toString();
     }
 
     public String getUsername(String token) {

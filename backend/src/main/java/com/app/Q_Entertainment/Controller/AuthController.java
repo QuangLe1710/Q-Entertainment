@@ -9,6 +9,7 @@ import com.app.Q_Entertainment.Service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<?> refresh(RefreshRequest refreshRequest, HttpServletRequest request){
+    public ApiResponse<?> refresh(@RequestBody RefreshRequest refreshRequest, HttpServletRequest request){
         return ResponseUtil.success(authService.refresh(refreshRequest), "Refresh Token Successfully", request.getRequestURI());
     }
 
