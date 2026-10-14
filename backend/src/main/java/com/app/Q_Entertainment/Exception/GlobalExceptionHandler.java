@@ -32,4 +32,14 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(NotExistTokenException.class)
+    public ApiResponse<?> handleNotExistTokenException(NotExistTokenException exception, HttpServletRequest request){
+        return ResponseUtil.error(
+                Arrays.asList(exception.getMessage()),
+                "Token not exist in system",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI()
+        );
+    }
+
 }

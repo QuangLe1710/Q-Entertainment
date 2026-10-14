@@ -1,25 +1,18 @@
 package com.app.Q_Entertainment.Util;
 
-import com.app.Q_Entertainment.Model.DTO.Response.AuthLoginResponse;
-import com.app.Q_Entertainment.Model.Entity.RefreshTokens;
 import com.app.Q_Entertainment.Model.Entity.User;
-import com.app.Q_Entertainment.Repository.RefreshTokensRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.UUID;
 
 @Component
 public class JwtTokenUtil {
@@ -56,21 +49,26 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(User user, UserDetails userDetails) {
+    /**
+     * Generate a refresh token JWT.
+     * @param user       the user entity
+     * @param userDetails Spring Security user details
+     * @param dbTokenId  the auto-generated DB id of the saved RefreshTokens row,
+     *                   embedded as claim so the /refresh endpoint can look it up
+     */
+    public String generateRefreshToken(User user, UserDetails userDetails, long dbTokenId) {
         Date now = new Date();
-        Date expireRT = DateUtil.generateExpirationRefreshToken(validityInMilliseconds);
-        String refreshTokenId = UUID.randomUUID().toString();
+        Date expireRT = DateUtil.generateExpirationRefreshToken(validityInMillisecondsRT);
 
         return Jwts.builder()
-                .subject(userDetails.getUsername())
-                .claim("userId", user.getId())
-                .claim("refreshId", refreshTokenId)
+                .subject(String.valueOf(user.getId()))   // subject = userId (string)
+                .claim("username", userDetails.getUsername())
+                .claim("refreshTokenId", dbTokenId)     // DB row id for fast lookup
                 .claim("token_type", "REFRESH")
                 .issuedAt(now)
                 .expiration(expireRT)
                 .signWith(secretKey)
                 .compact();
-
     }
 
     public Claims getClaims(String token) {
@@ -81,8 +79,8 @@ public class JwtTokenUtil {
                 .getPayload();
     }
 
-    public String getRefreshId(String token){
-        return getClaims(token).get("refreshId").toString();
+    public String getRefreshTokenId(String token){
+        return getClaims(token).get("refreshTokenId").toString();
     }
 
     public String getUsername(String token) {
