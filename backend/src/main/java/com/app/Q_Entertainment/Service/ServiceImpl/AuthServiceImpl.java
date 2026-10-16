@@ -114,18 +114,18 @@ public class AuthServiceImpl implements AuthService {
         String username = claims.get("username", String.class);
 
         // 2. Find the token record in DB
-        RefreshTokens rt = refreshTokensRepository.findByUserIdAndRefreshTokenId(userId, refreshTokenId)
+        RefreshTokens rt = refreshTokensRepository.findByUserIdAndRefreshTokenId(userId, refreshTokenId) // Hit database 1
                 .orElseThrow(() -> new NotExistTokenException("Refresh token not found in system"));
 
         // 3. RTR Security checks
         if (Boolean.TRUE.equals(rt.getIsRevoked())) {
             // Token reuse detected! Revoke ALL tokens of this user (possible token theft)
-            refreshTokensRepository.revokeAllByUserId(userId);
+            refreshTokensRepository.revokeAllByUserId(userId); // Hit database 2
             throw new NotExistTokenException("Refresh token has been revoked — possible token theft detected");
         }
 
         if (rt.getExpiresAt().isBefore(java.time.Instant.now())) {
-            throw new NotExistTokenException("Refresh token has expired");
+            throw new NotExistTokenException("Refresh token has expired please login again");
         }
 
         // 4. Verify token hash matches what's stored in DB
@@ -135,17 +135,17 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 5. RTR: Revoke the old token immediately
-        refreshTokensRepository.revokeById(rt.getId());
+        refreshTokensRepository.revokeById(rt.getId()); // Hit database 3
 
         // 6. Load user and issue a brand-new token pair
-        User user = usersRepository.findById(userId)
+        User user = usersRepository.findById(userId)  // Hit database 4
                 .orElseThrow(() -> new InvalidUsernamePasswordException("User not found"));
         CustomUserDetails userDetails = customUserDetailsService.fromUser(user);
 
         Date expireRT = DateUtil.generateExpirationRefreshToken(validityInMillisecondsRT);
 
         // Save placeholder → get DB id → update hash (same flow as login)
-        RefreshTokens newToken = refreshTokensRepository.save(RefreshTokens.builder()
+        RefreshTokens newToken = refreshTokensRepository.save(RefreshTokens.builder() // Hit database  5
                 .userId(userId)
                 .refreshTokenHash("placeholder")
                 .deviceInfo(rt.getDeviceInfo())
@@ -155,7 +155,7 @@ public class AuthServiceImpl implements AuthService {
                 .build());
 
         String newRefreshToken = jwtTokenUtil.generateRefreshToken(user, userDetails, newToken.getId());
-        refreshTokensRepository.updateHashById(newToken.getId(), hashWithSHA256(newRefreshToken));
+        refreshTokensRepository.updateHashById(newToken.getId(), hashWithSHA256(newRefreshToken)); // Hit database 6
 
         return AuthLoginResponse.builder()
                 .accessToken(jwtTokenUtil.generateAccessToken(userDetails))
