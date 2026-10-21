@@ -49,6 +49,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             } catch (RuntimeException ignored) {
                 // Invalid tokens remain unauthenticated and are handled by Spring Security.
+                System.out.println("[JwtRequestFilter] Token validation failed: " + ignored.getMessage());
             }
         }
 
